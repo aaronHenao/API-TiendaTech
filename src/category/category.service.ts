@@ -41,7 +41,7 @@ export class CategoryService {
 
         const existingCategory = await this.categoryRepository.findOneBy({name: updateCategory.name})
 
-        if(existingCategory === null){
+        if(existingCategory){
             throw new ConflictException(`La categoría ya existe`)
         }
 
