@@ -4,6 +4,7 @@ import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class CategoryService {
@@ -16,7 +17,7 @@ export class CategoryService {
         if(!categories || categories.length === 0){
             throw new NotFoundException('No se encontraron categorias');
         }
-        return categories.map(category => new CategoryResponseDto(category))
+        return categories.map(category => plainToInstance(CategoryResponseDto, category))
     }
 
 
@@ -29,7 +30,7 @@ export class CategoryService {
 
         const category = await this.categoryRepository.create(newCategory);
         const savedCategory = await this.categoryRepository.save(category);
-        return new CategoryResponseDto(savedCategory)
+        return plainToInstance(CategoryResponseDto, savedCategory)
     }
 
     async update(id: number, updateCategory: CreateCategoryDto): Promise<CategoryResponseDto>{
@@ -46,8 +47,7 @@ export class CategoryService {
         }
 
         const updatedCategory = await this.categoryRepository.save(category)
-        return new CategoryResponseDto(updatedCategory)
-
+        return plainToInstance(CategoryResponseDto, updatedCategory)
     }
 
     async delete(id: number): Promise<CategoryResponseDto>{
@@ -58,6 +58,6 @@ export class CategoryService {
         }
 
         await this.categoryRepository.remove(category);
-        return new CategoryResponseDto(category)
+        return plainToInstance(CategoryResponseDto, category)
     }
 }

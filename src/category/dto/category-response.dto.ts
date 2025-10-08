@@ -1,9 +1,11 @@
-export class CategoryResponseDto{
-    id: number;
-    name:string;
+import { Expose, Type } from "class-transformer";
 
-    constructor(category: any){
-        this.id = category.id;
-        this.name = category.name
-    }
+export class CategoryResponseDto{
+    
+    @Expose()
+    @Type(() => Number)
+    id: number;
+
+    @Expose()
+    name:string;
 }

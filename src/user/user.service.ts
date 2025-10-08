@@ -5,6 +5,8 @@ import { Rol, User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import * as bcrypt from 'bcrypt';
+import { plainToClass, plainToInstance } from 'class-transformer';
+import { Product } from 'src/product/entities/product.entity';
 
 @Injectable()
 export class UserService {
@@ -21,7 +23,7 @@ export class UserService {
         const hashedPassword = await bcrypt.hash(createUser.password, saltRounds);
         const newUser = this.userRespository.create({...createUser, password: hashedPassword, rol: Rol.CUSTOMER,});
         const savedUser = await this.userRespository.save(newUser);
-        return new UserResponseDto(savedUser);
+        return plainToInstance(UserResponseDto, savedUser);
     }
 
     async createAdmin(createAdmin: CreateUserDto): Promise<UserResponseDto>{
@@ -35,7 +37,7 @@ export class UserService {
         const hashedPassword = await bcrypt.hash(createAdmin.password, saltRounds);
         const newAdmin = this.userRespository.create({...createAdmin, password: hashedPassword, rol: Rol.ADMIN,});
         const savedAdmin = await this.userRespository.save(newAdmin);
-        return new UserResponseDto(savedAdmin);
+        return plainToInstance(UserResponseDto, savedAdmin);;
     }
 
     async findOneByEmail(email: string): Promise<User | null>{
