@@ -38,8 +38,7 @@ export class UserService {
         return new UserResponseDto(savedAdmin);
     }
 
-    async findOneByEmail(email: string): Promise<UserResponseDto>{
-        const user = await this.userRespository.findOneBy({email})
-        return new UserResponseDto(user)
+    async findOneByEmail(email: string): Promise<User | null>{
+        return this.userRespository.findOneBy({email})
     }
 }
