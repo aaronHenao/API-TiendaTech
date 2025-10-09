@@ -8,6 +8,7 @@ import { plainToInstance } from 'class-transformer';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductCategory } from './entities/product-category.entity';
 import { CategoryResponseDto } from 'src/category/dto/category-response.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -53,14 +54,10 @@ export class ProductService {
             }
         }
 
-        const response = plainToInstance(ProductResponseDto, savedProduct, {
-            excludeExtraneousValues: true,
-        }) as any;
+        const response = plainToInstance(ProductResponseDto, savedProduct) as any;
 
         if (validCategories.length > 0) {
-            response.categories = plainToInstance(CategoryResponseDto, validCategories, {
-            excludeExtraneousValues: true,
-            });
+            response.categories = plainToInstance(CategoryResponseDto, validCategories);
         }
 
 
@@ -69,6 +66,29 @@ export class ProductService {
         }
         return response;
     }
+
+    async update(id: number, productUpdate: UpdateProductDto): Promise<ProductResponseDto>{
+        const product = await this.productRepository.preload({id: id, ...productUpdate});
+
+        if(!product){
+            throw new NotFoundException(`Producto con id ${id} no existe`)
+        }
+        const updatedProduct = this.productRepository.save(product)
+        return plainToInstance(ProductResponseDto, updatedProduct)
+    }
+
+    async delete(id: number): Promise<ProductResponseDto>{
+        const product = await this.productRepository.findOneBy({id});
+
+        if(!product){
+            throw new NotFoundException(`Producto con id ${id} no existe`)
+        }
+        await this.productCategoryRepository.delete({ productId: id });
+        
+        await this.productRepository.remove(product)
+        return plainToInstance(ProductResponseDto, product)
+    }
+
 
 }
 
