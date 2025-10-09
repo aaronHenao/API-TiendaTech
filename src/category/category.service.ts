@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { plainToInstance } from 'class-transformer';
@@ -18,6 +18,26 @@ export class CategoryService {
             throw new NotFoundException('No se encontraron categorias');
         }
         return categories.map(category => plainToInstance(CategoryResponseDto, category))
+    }
+
+    async getById(id: number): Promise<Category | null>{
+        const category = await this.categoryRepository.findOneBy({id})
+        if(category){
+            return category;
+        }
+        return null;
+    }
+
+    async findByIds(ids: number[]): Promise<Category[]> {
+        if (!ids || ids.length === 0) {
+            return [];
+        }
+    
+        const categories = await this.categoryRepository.findBy({
+            id: In(ids),
+        });
+
+        return categories;
     }
 
 
