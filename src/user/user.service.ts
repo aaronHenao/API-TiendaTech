@@ -50,6 +50,6 @@ export class UserService {
 
     async findOneByEmail(email: string): Promise<UserResponseDto>{
         const user = await this.userRespository.findOneBy({email});
-        return plainToInstance(UserResponseDto, user, {excludeExtraneousValues: true})
+        return plainToInstance(User, {excludeExtraneousValues: true})
     }
 }
