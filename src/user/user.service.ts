@@ -48,8 +48,8 @@ export class UserService {
         return plainToInstance(UserResponseDto, savedAdmin, {excludeExtraneousValues: true});
     }
 
-    async findOneByEmail(email: string): Promise<UserResponseDto>{
+    async findOneByEmail(email: string){
         const user = await this.userRespository.findOneBy({email});
-        return plainToInstance(User, {excludeExtraneousValues: true})
+        return user
     }
 }
