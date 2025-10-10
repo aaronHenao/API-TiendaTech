@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Cart } from "src/cart/entities/cart.entity";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum Rol{
     ADMIN = 'ADMIN',
@@ -20,4 +21,8 @@ export class User {
 
     @Column({type: 'enum', enum: Rol, default: Rol.CUSTOMER})
     rol: Rol;
+
+    @OneToOne(() => Cart, cart => cart.customerId)
+    cart: Cart;
+
 }

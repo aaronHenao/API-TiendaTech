@@ -12,7 +12,8 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
-    constructor(@InjectRepository(Product) private productRepository: Repository<Product>,
+    constructor(
+        @InjectRepository(Product) private productRepository: Repository<Product>,
         @InjectRepository(ProductCategory) private productCategoryRepository: Repository<ProductCategory>,  
         private readonly categoryService: CategoryService
     ){}
@@ -26,46 +27,46 @@ export class ProductService {
     }
 
     async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
-        const { categoryIds, ...productDetails } = createProductDto;
+        const { categoryIds = [], ...productDetails } = createProductDto;
 
-        const newProductEntity = this.productRepository.create(productDetails);
-        const savedProduct = await this.productRepository.save(newProductEntity);
+        const savedProduct = await this.productRepository.save(
+            this.productRepository.create(productDetails)
+        );
 
-        let invalidCategoryIds: number[] = [];
-        let validCategories: any[] = [];
 
-        if (categoryIds && categoryIds.length > 0) {
+        if (categoryIds.length === 0) {
+            return plainToInstance(ProductResponseDto, savedProduct);
+        }
 
-            const categories = await this.categoryService.findByIds(categoryIds);
 
-            const foundIds = categories.map(c => c.id);
-            invalidCategoryIds = categoryIds.filter(id => !foundIds.includes(id));
-            validCategories = categories;
-            
-            if (categories.length > 0) {
+        const categories = await this.categoryService.findByIds(categoryIds);
+        const foundIds = categories.map(c => c.id);
+        const invalidCategoryIds = categoryIds.filter(id => !foundIds.includes(id));
+
+        
+        if (categories.length > 0) {
             const relations = categories.map(category =>
-                this.productCategoryRepository.create({
+            this.productCategoryRepository.create({
                 productId: savedProduct.id,
                 categoryId: category.id,
-                }),
+            }),
             );
-
             await this.productCategoryRepository.save(relations);
-            }
         }
 
-        const response = plainToInstance(ProductResponseDto, savedProduct) as any;
-
-        if (validCategories.length > 0) {
-            response.categories = plainToInstance(CategoryResponseDto, validCategories);
-        }
-
+        
+        const response = plainToInstance(ProductResponseDto, {
+            ...savedProduct,
+            categories: plainToInstance(CategoryResponseDto, categories),
+        }, {excludeExtraneousValues: true}) as any;
 
         if (invalidCategoryIds.length > 0) {
             response.warning = `Las siguientes categorías no se asociaron porque no existen: ${invalidCategoryIds.join(', ')}`;
         }
+
         return response;
     }
+
 
     async update(id: number, productUpdate: UpdateProductDto): Promise<ProductResponseDto>{
         const product = await this.productRepository.preload({id: id, ...productUpdate});
