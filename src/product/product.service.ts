@@ -9,6 +9,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { ProductCategory } from './entities/product-category.entity';
 import { CategoryResponseDto } from 'src/category/dto/category-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductCartResponseDto } from './dto/product-cart-response.dto';
 
 @Injectable()
 export class ProductService {
@@ -90,6 +91,14 @@ export class ProductService {
         return plainToInstance(ProductResponseDto, product)
     }
 
+    async getById(id: number): Promise<ProductCartResponseDto>{
+        const product = await this.productRepository.findOneBy({id})
 
+        if(!product){
+            throw new NotFoundException(`El producto con id ${id} no existe`)
+        }
+
+        return plainToInstance(ProductCartResponseDto, product, {excludeExtraneousValues: true,});
+    }
 }
 
