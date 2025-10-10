@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BaseApplicationResponse } from 'src/common/dto/base-application-response.dto';
@@ -7,6 +7,16 @@ import { UserResponseDto } from './dto/user-response.dto';
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService){}
+
+    @Get()
+    async getAll(): Promise<BaseApplicationResponse<UserResponseDto[]>>{
+        const users = await this.userService.getAll();
+        return{
+            statusCode: 200, 
+            message: 'Usuarios obtenidos correctamente',
+            data: users
+        }
+    }
 
     @Post('register')
     async create(@Body() newUser: CreateUserDto): Promise<BaseApplicationResponse<UserResponseDto>>{
