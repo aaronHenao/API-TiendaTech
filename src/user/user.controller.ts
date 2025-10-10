@@ -1,14 +1,20 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { BaseApplicationResponse } from 'src/common/dto/base-application-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles/roles.decorator';
+import { Rol } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService){}
-
+    
     @Get()
+    @Roles(Rol.ADMIN)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
     async getAll(): Promise<BaseApplicationResponse<UserResponseDto[]>>{
         const users = await this.userService.getAll();
         return{
@@ -22,7 +28,7 @@ export class UserController {
     async create(@Body() newUser: CreateUserDto): Promise<BaseApplicationResponse<UserResponseDto>>{
         const user = await this.userService.create(newUser);
         return{
-            statusCode: 201, 
+            statusCode: 201,
             message: 'Usuario creado correctamente',
             data: user
         }
@@ -40,12 +46,14 @@ export class UserController {
     }
 
     //Despues de crear el primer admin, usa este endpoint protegido
+    @Roles(Rol.ADMIN)
+    @UseGuards(AuthGuard('jwt'), RolesGuard)
     @Post('admin')
     async createNewAdmin(@Body() newAdmin: CreateUserDto): Promise<BaseApplicationResponse<UserResponseDto>>{
         const admin = await this.userService.createAdmin(newAdmin);
         return{
             statusCode: 201, 
-            message: 'Administrador creado correctamente',
+            message: 'Nuevo administrador creado correctamente',
             data: admin
         }
     }
