@@ -20,7 +20,7 @@ export class OrderService {
         const existingOrder = await this.orderRepository.findOne({where: {customerId: userId, status: In([OrderStatus.PENDING, OrderStatus.PROCESSING])}});
 
         if(existingOrder){
-            throw new ConflictException(`No puedes crear una nueva orden. Ya tienes una orden en estado ${existingOrder.status}`)
+            return this.processOrder(existingOrder);
         }
 
         const newOrder = this.orderRepository.create({customerId: userId, status: OrderStatus.PENDING});
@@ -57,10 +57,10 @@ export class OrderService {
         }
         await this.orderItemRespository.save(items);
         await this.cartService.toEmptyCart(orderItems[0].cartId);
+
         order.status = OrderStatus.SHIPPED;
+
         await this.orderRepository.save(order);
         return plainToInstance(OrderResponseDto, {id: order.id, status: order.status, items: items}, {excludeExtraneousValues: true });
     }
-
-
 }
