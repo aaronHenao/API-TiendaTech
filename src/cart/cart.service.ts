@@ -107,4 +107,28 @@ export class CartService {
         return plainToInstance(DeleteItemResponseDto, existingItem);
     }
 
+    async getCartItemsWithStock(userId: number): Promise<CartItem[]>{
+        const cartId = await this.getCartId(userId);
+        if(!cartId){
+            throw new NotFoundException('Actualmente no tienes un carrito');
+        }
+
+        const items = await this.cartItemRepository.findOne({where: {cartId}});
+
+        if(!items){
+            throw new NotFoundException('No tienes productos en el carrito')
+        }
+
+        const cartItems = await this.cartItemRepository.find({where: {cartId}, relations: ['product']});
+        return cartItems.map(item => plainToInstance(CartItem, item))  
+    }
+
+    async reduceStock(id:number, quantity:number): Promise<true|null>{
+        return this.productService.reduceStock(id, quantity);
+    }
+
+    async toEmptyCart(cartId: number) {
+        await this.cartItemRepository.delete({ cartId });
+    }
+
 }
