@@ -7,7 +7,8 @@ import { AddCartItemDto } from './dto/add-cart-item.dto';
 import { AddCartItemResponseDto } from './dto/add-cart-item-response.dto';
 import { ProductService } from 'src/product/product.service';
 import { plainToInstance } from 'class-transformer';
-import { DeleteItemResponseDto } from './dto/delete-item-response.dto';
+import { DeleteItemResponseDto } from './dto/delete-item-reponse.dto';
+import { CartItemResponseDto } from './dto/cart-item-response.dto';
 
 @Injectable()
 export class CartService {
@@ -17,7 +18,22 @@ export class CartService {
         private readonly productService: ProductService
     ){}
 
-    
+    async getCartItems(userId: number): Promise<CartItemResponseDto[]>{
+        const cartId = await this.getCartId(userId);
+        if(!cartId){
+            throw new NotFoundException('Actualmente no tienes un carrito');
+        }
+
+        const items = await this.cartItemRepository.findOne({where: {cartId}});
+
+        if(!items){
+            throw new NotFoundException('No tienes productos en el carrito')
+        }
+
+        const cartItems = await this.cartItemRepository.find({where: {cartId}});
+        return cartItems.map(item => plainToInstance(CartItemResponseDto, item, {excludeExtraneousValues: true}))  
+    }
+
     private async createOrFindCart(id: number): Promise<Cart>{
         let cart = await this.cartRepository.findOne({where: {customerId: id}, relations: ['items']})
 
@@ -32,7 +48,7 @@ export class CartService {
     async addItem(userId: number, item: AddCartItemDto): Promise<AddCartItemResponseDto>{
         const cart = await this.createOrFindCart(userId);
         await this.productService.getById(item.productId);
-        const existingItem = await this.cartItemRepository.findOne({where: {productId: item.productId}})
+        const existingItem = await this.cartItemRepository.findOne({where: {productId: item.productId, cartId: cart.id}})
 
         if(existingItem){
             throw new ConflictException(`El producto con id ${item.productId} ya está en el carrito. Actualízalo!`)
@@ -41,7 +57,7 @@ export class CartService {
         const newItem = this.cartItemRepository.create({cartId: cart.id, ...item});
         
         await this.cartItemRepository.save(newItem);
-        return plainToInstance(AddCartItemResponseDto, newItem)
+        return plainToInstance(AddCartItemResponseDto, newItem, {excludeExtraneousValues: true})
     }
 
 
@@ -61,7 +77,7 @@ export class CartService {
             throw new NotFoundException('No tienes un carrito creado')
         }
         
-        let newItem = await this.cartItemRepository.findOne({where: {productId: item.productId}})
+        let newItem = await this.cartItemRepository.findOne({where: {productId: item.productId, cartId: existingCart}})
 
         if(!newItem){
             throw new NotFoundException(`El producto con id ${item.productId} no está agregado a tu carrito, agrégalo primero`)
@@ -70,7 +86,7 @@ export class CartService {
         newItem.quantity = item.quantity;
         await this.cartItemRepository.save(newItem);
         
-        return plainToInstance(AddCartItemResponseDto, newItem)
+        return plainToInstance(AddCartItemResponseDto, newItem, {excludeExtraneousValues: true})
     }
 
     async deleteItem(userId: number, productId: number): Promise<DeleteItemResponseDto>{
@@ -80,7 +96,7 @@ export class CartService {
             throw new NotFoundException('No tienes un carrito creado');
         }
 
-        const existingItem = await this.cartItemRepository.findOne({ where: { productId } });
+        const existingItem = await this.cartItemRepository.findOne({ where: { productId, cartId: existingCart } });
 
         if (!existingItem) {
             throw new NotFoundException(`El producto con id ${productId} no está en tu carrito`);

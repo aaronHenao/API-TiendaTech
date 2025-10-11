@@ -21,9 +21,11 @@ export class ProductService {
 
     async getAll(): Promise<ProductResponseDto[]>{
         const products = await this.productRepository.find()
+
         if(!products || products.length === 0){
             throw new NotFoundException('No se encontraron productos');
         }
+        
         return products.map(product => plainToInstance(ProductResponseDto, product))
     }
 

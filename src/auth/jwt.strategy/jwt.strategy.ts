@@ -14,9 +14,6 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     }
 
     async validate(payload: any){
-        if (!payload) {
-            throw new UnauthorizedException('Token inválido o expirado');
-        }
         return { id: payload.sub, email: payload.email, rol: payload.rol};
     }
 }
