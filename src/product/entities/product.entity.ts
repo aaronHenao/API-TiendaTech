@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { ProductCategory } from "./product-category.entity";
+import { Review } from "src/review/entities/review.entity";
 
 @Entity()
 export class Product{
@@ -22,4 +23,7 @@ export class Product{
 
     @OneToMany(() => ProductCategory, pc => pc.product)
     productCategories: ProductCategory[];
+
+    @OneToMany(() => Review, review => review.product)
+    reviews: Review[];
 }

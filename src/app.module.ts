@@ -10,6 +10,7 @@ import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { RolesGuard } from './guards/roles.guard';
 import { OrderModule } from './order/order.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { OrderModule } from './order/order.module';
     CategoryModule,
     ProductModule,
     CartModule,
-    OrderModule],
+    OrderModule,
+    ReviewModule],
   controllers: [AppController],
   providers: [AppService, RolesGuard],
 })

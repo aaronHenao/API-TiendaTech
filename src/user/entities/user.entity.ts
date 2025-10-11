@@ -1,4 +1,5 @@
 import { Cart } from "src/cart/entities/cart.entity";
+import { Review } from "src/review/entities/review.entity";
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 export enum Rol{
@@ -24,5 +25,8 @@ export class User {
 
     @OneToOne(() => Cart, cart => cart.customerId)
     cart: Cart;
+
+    @OneToMany(() => Review, review => review.user)
+    reviews: Review[];
 
 }
