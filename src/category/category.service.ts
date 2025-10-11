@@ -71,13 +71,19 @@ export class CategoryService {
     }
 
     async delete(id: number): Promise<CategoryResponseDto>{
-        const category = await this.categoryRepository.findOneBy({id});
+        const category = await this.categoryRepository.findOne({where: { id },relations: ['productCategories'],});
 
-        if(!category){
-            throw new NotFoundException(`La categoría con id ${id} no existe`)
+        if (!category) {
+            throw new NotFoundException(`La categoría con id ${id} no existe`);
+        }
+
+        if (category.productCategories.length > 0) {
+            throw new BadRequestException(
+            `No puedes eliminar la categoría ${category.name} porque tiene productos asociados.`
+            );
         }
 
         await this.categoryRepository.remove(category);
-        return plainToInstance(CategoryResponseDto, category)
+        return plainToInstance(CategoryResponseDto, category);
     }
 }
