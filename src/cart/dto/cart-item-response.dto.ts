@@ -7,4 +7,7 @@ export class CartItemResponseDto{
 
     @Expose()
     quantity: number;
+
+    @Expose()
+    price: number;
 }

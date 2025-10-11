@@ -78,6 +78,7 @@ export class ProductService {
             throw new NotFoundException(`Producto con id ${id} no existe`)
         }
         const updatedProduct = this.productRepository.save(product)
+        
         return plainToInstance(ProductResponseDto, updatedProduct)
     }
 
@@ -101,6 +102,14 @@ export class ProductService {
         }
 
         return plainToInstance(ProductCartResponseDto, product, {excludeExtraneousValues: true,});
+    }
+
+    async reduceStock(id:number, quantity:number): Promise<true | null>{
+        const result = await this.productRepository.decrement({id: id}, 'stock', quantity);
+        if(result){
+            return true;
+        }
+        return null;
     }
 }
 

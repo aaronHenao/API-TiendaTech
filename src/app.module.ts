@@ -9,6 +9,7 @@ import { CategoryModule } from './category/category.module';
 import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { RolesGuard } from './guards/roles.guard';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { RolesGuard } from './guards/roles.guard';
     AuthModule,
     CategoryModule,
     ProductModule,
-    CartModule],
+    CartModule,
+    OrderModule],
   controllers: [AppController],
   providers: [AppService, RolesGuard],
 })
