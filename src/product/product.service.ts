@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Repository } from 'typeorm';
@@ -19,14 +19,17 @@ export class ProductService {
         private readonly categoryService: CategoryService
     ){}
 
-    async getAll(): Promise<ProductResponseDto[]>{
+    async getAll(userRol: string): Promise<ProductResponseDto[]>{
         const products = await this.productRepository.find()
 
         if(!products || products.length === 0){
             throw new NotFoundException('No se encontraron productos');
         }
-        
+        if(userRol === 'CUSTOMER'){
+            return products.map(product => plainToInstance(ProductResponseDto, product, {excludeExtraneousValues: true}))
+        }
         return products.map(product => plainToInstance(ProductResponseDto, product))
+        
     }
 
     async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
@@ -36,17 +39,16 @@ export class ProductService {
             this.productRepository.create(productDetails)
         );
 
-
         if (categoryIds.length === 0) {
-            return plainToInstance(ProductResponseDto, savedProduct);
+            this.delete(savedProduct.id);
+            throw new ConflictException('El producto debe pertenecer al menos a una categoría')
         }
-
 
         const categories = await this.categoryService.findByIds(categoryIds);
         const foundIds = categories.map(c => c.id);
         const invalidCategoryIds = categoryIds.filter(id => !foundIds.includes(id));
 
-        
+    
         if (categories.length > 0) {
             const relations = categories.map(category =>
             this.productCategoryRepository.create({
@@ -55,6 +57,9 @@ export class ProductService {
             }),
             );
             await this.productCategoryRepository.save(relations);
+        } else {
+            this.delete(savedProduct.id);
+             throw new ConflictException('El producto debe pertenecer al menos a una categoría válida')
         }
 
         
