@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order, OrderStatus } from './entities/order.entity';
 import { In, Repository } from 'typeorm';
@@ -62,5 +62,23 @@ export class OrderService {
 
         await this.orderRepository.save(order);
         return plainToInstance(OrderResponseDto, {id: order.id, status: order.status, items: items}, {excludeExtraneousValues: true });
+    }
+
+    async getOrderItemByUserId(userId: number, productId: number){
+        const existingOrders = await this.orderRepository.find({where: {customerId: userId, status: OrderStatus.SHIPPED}, relations: ['items']});
+
+        if(!existingOrders || existingOrders.length === 0){
+            throw new NotFoundException('No tienes ninguna orden en estado "SHIPPED".');
+        }
+
+        for(const order of existingOrders){
+            const item = order.items.find(i => i.productId === productId);
+            if(item){
+                return item;
+            }
+        }
+    
+        throw new NotFoundException(`El producto con ID ${productId} no existe en ninguna  orden.`)
+
     }
 }
