@@ -6,8 +6,9 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles/roles.decorator';
-import { Rol } from 'src/user/entities/user.entity';
+import { Rol, User } from 'src/user/entities/user.entity';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { GetUser } from 'src/common/decorators/get-user/get-user.decorator';
 
 @Controller('product')
 export class ProductController {
@@ -15,8 +16,8 @@ export class ProductController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'))
-    async getAll(): Promise<BaseApplicationResponse<ProductResponseDto[]>>{
-        const products = await this.productService.getAll()
+    async getAll(@GetUser() user: User): Promise<BaseApplicationResponse<ProductResponseDto[]>>{
+        const products = await this.productService.getAll(user.rol)
         return {
             statusCode: 200,
             message: 'Productos obtenidos correctamente',

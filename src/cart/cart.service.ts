@@ -21,7 +21,7 @@ export class CartService {
     async getCartItems(userId: number): Promise<CartItemResponseDto[]>{
         const cartId = await this.getCartId(userId);
         if(!cartId){
-            throw new NotFoundException('Actualmente no tienes un carrito');
+            throw new NotFoundException('Aún no tienes un carrito. Agrega un producto para crearlo');
         }
 
         const items = await this.cartItemRepository.findOne({where: {cartId}});
