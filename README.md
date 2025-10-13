@@ -39,7 +39,7 @@ npm install
 
 Para que el proyecto se conecte correctamente a la base de datos y maneje la autenticación, debes crear un archivo llamado **`.env`** en la raíz del proyecto.
 
-Este archivo debe contener las variables de entorno necesarias, como la cadena de conexión a la base de datos y la llave secreta para JWT (JSON Web Tokens).
+Este archivo debe contener las variables de entorno necesarias, como los datos de conexión a la base de datos y la llave secreta para JWT (JSON Web Tokens).
 
 **Ejemplo de estructura básica del archivo `.env`:**
 
