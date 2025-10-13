@@ -44,11 +44,11 @@ Este archivo debe contener las variables de entorno necesarias, como la cadena d
 **Ejemplo de estructura básica del archivo `.env`:**
 
 ```env
-DB_HOST
-DB_PORT
-DB_USERNAME
-DB_DATABASE
-DB_PASSWORD 
+DB_HOST = El host de tu DB
+DB_PORT = El puerto en el que corre
+DB_USERNAME = Nombre de usuario
+DB_DATABASE = Nombre de la DB
+DB_PASSWORD = Contraseña de la DB
 JWT_SECRET=tu_llave_secreta_aqui
 ```
 
