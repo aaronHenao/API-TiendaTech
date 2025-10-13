@@ -66,5 +66,5 @@ npm run build
 # 2. Iniciar el servidor (modo desarrollo)
 npm run start:dev
 ```
-
+**NOTA**: En el controller de user hay un método para crear un ADMIN por primera vez, el cuál después de creado el primer admin debe ser eliminado o comentado.
 El servidor estará disponible en el puerto configurado (por defecto: http://localhost:3000).
